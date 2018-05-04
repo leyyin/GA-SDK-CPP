@@ -411,6 +411,8 @@ class TargetLinux(TargetCMake):
                 '-DPLATFORM:STRING=' + self.name,
                 '-DCMAKE_BUILD_TYPE=RELEASE',
 		        '-DTARGET_ARCH:STRING=' + self.architecture,
+                '-DCMAKE_C_COMPILER=clang',
+                '-DCMAKE_CXX_COMPILER=clang++',
                 '-G',
                 self.generator
             ],
@@ -428,7 +430,8 @@ class TargetLinux(TargetCMake):
 
         call_process(
             [
-                'make'
+                'make',
+                '-j4'
             ],
             self.build_dir(),
             silent=silent
@@ -445,6 +448,8 @@ class TargetLinux(TargetCMake):
                 '-DPLATFORM:STRING=' + self.name,
                 '-DCMAKE_BUILD_TYPE=DEBUG',
 		        '-DTARGET_ARCH:STRING=' + self.architecture,
+                '-DCMAKE_C_COMPILER=clang',
+                '-DCMAKE_CXX_COMPILER=clang++',
                 '-G',
                 self.generator
             ],
@@ -462,7 +467,8 @@ class TargetLinux(TargetCMake):
 
         call_process(
             [
-                'make'
+                'make',
+                '-j4'
             ],
             self.build_dir(),
             silent=silent
