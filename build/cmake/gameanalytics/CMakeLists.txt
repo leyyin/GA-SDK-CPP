@@ -228,7 +228,9 @@ else()
 endif("${UWP_ALL}")
 
 create_source_groups( CPP_SOURCES )
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+if("${LINUX_ALL}")
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif("${LINUX_ALL}")
 ADD_LIBRARY (GameAnalytics ${LIB_TYPE} ${CPP_SOURCES})
 #target_compile_features(GameAnalytics PRIVATE cxx_inline_namespaces)
 
