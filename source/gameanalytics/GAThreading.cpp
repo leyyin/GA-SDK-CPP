@@ -17,6 +17,7 @@ namespace gameanalytics
     {
         // static members
         std::shared_ptr<GAThreading::State> GAThreading::state;
+        double GAThreading::MainThreadWaitInSeconds = 1.0;
 
         void GAThreading::initIfNeeded()
         {
@@ -36,6 +37,17 @@ namespace gameanalytics
             std::push_heap(state->blocks.begin(), state->blocks.end());
         }
 
+        bool GAThreading::HasJobs()
+        {
+            GAThreadHelpers::scoped_lock lock(state->mutex);
+            return !state->blocks.empty();
+        }
+
+        bool GAThreading::IsThreadRunning()
+        {
+            return !state->endThread;
+        }
+
         void GAThreading::performTaskOnGAThread(const Block& taskBlock)
         {
             initIfNeeded();
@@ -46,7 +58,7 @@ namespace gameanalytics
 
         void GAThreading::endThread()
         {
-            logging::GALogger::d("ending thread");
+            logging::GALogger::ii("ending thread");
             GAThreadHelpers::scoped_lock lock(state->mutex);
             state->endThread = true;
         }
@@ -68,7 +80,7 @@ namespace gameanalytics
 
         void* GAThreading::thread_routine(void*)
         {
-            logging::GALogger::d("thread_routine start");
+            logging::GALogger::ii("thread_routine start");
             while(!state)
             {
                 // wait for the assignment to be complete
@@ -98,7 +110,7 @@ namespace gameanalytics
                         break;
                     }
 
-                    std::this_thread::sleep_for(std::chrono::seconds(1));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(MainThreadWaitInSeconds * 1000)));
                 }
             }
             catch(const std::exception& e)

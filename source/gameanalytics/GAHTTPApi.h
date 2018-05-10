@@ -98,7 +98,7 @@ namespace gameanalytics
             std::string baseUrl;
             std::string initializeUrlPath;
             std::string eventsUrlPath;
-            bool useGzip;
+            bool useGzip = false;
             static const int MaxCount;
             static std::map<EGASdkErrorType, int> countMap;
 #if USE_UWP

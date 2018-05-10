@@ -59,6 +59,12 @@ namespace gameanalytics
 
             static void endThread();
 
+            // Does this have any jobs left to process?
+            static bool HasJobs();
+
+            static bool IsThreadRunning();
+
+            static double MainThreadWaitInSeconds;
          private:
 
 #if USE_TIZEN
@@ -112,7 +118,7 @@ namespace gameanalytics
                 GAThreadHelpers::mutex mutex;
 
                 GAThreadHelpers::scoped_thread thread;
-                bool endThread;
+                bool endThread = false;
             };
 
             static std::shared_ptr<State> state;
@@ -128,6 +134,8 @@ namespace gameanalytics
 #endif
 
             static void initIfNeeded();
+
+            static int MainThreadWaitSeconds;
         };
     }
 }

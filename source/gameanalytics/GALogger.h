@@ -51,9 +51,9 @@ namespace gameanalytics
             static void initializeLog();
 #endif
             // Settings
-            bool infoLogEnabled;
-            bool infoLogVerboseEnabled;
-            bool debugEnabled;
+            bool infoLogEnabled = false;
+            bool infoLogVerboseEnabled = false;
+            bool debugEnabled = false;
             static const std::string tag;
 #if USE_UWP
             static void LogMessageToConsole(Platform::Object^ parameter);
@@ -61,7 +61,7 @@ namespace gameanalytics
 #endif
 #if !USE_UWP && !USE_TIZEN
             std::shared_ptr<spdlog::logger> logger;
-            bool logInitialized;
+            bool logInitialized = false;
             std::shared_ptr<spdlog::logger> custom_logger;
 #endif
         };

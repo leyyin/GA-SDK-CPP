@@ -217,6 +217,7 @@ namespace gameanalytics
 #endif
         threading::GAThreading::performTaskOnGAThread([gameKey, gameSecret]()
         {
+            logging::GALogger::ii("SORB (inside thread) GameAnalytics::initialize");
             if (isSdkReady(true, false))
             {
                 logging::GALogger::w("SDK already initialized. Can only be called once.");
@@ -458,8 +459,10 @@ namespace gameanalytics
 
     void GameAnalytics::startSession()
     {
+        logging::GALogger::ii("SORB GameAnalytics::startSession");
         threading::GAThreading::performTaskOnGAThread([]()
         {
+            logging::GALogger::ii("SORB (inside thread) GameAnalytics::startSession");
             if(state::GAState::useManualSessionHandling())
             {
                 if (!state::GAState::isInitialized())
@@ -479,6 +482,7 @@ namespace gameanalytics
 
     void GameAnalytics::endSession()
     {
+        logging::GALogger::ii("SORB GameAnalytics::endSession");
         if (state::GAState::useManualSessionHandling())
         {
             onSuspend();
@@ -490,6 +494,7 @@ namespace gameanalytics
 
     void GameAnalytics::onResume()
     {
+        logging::GALogger::ii("SORB GameAnalytics::onResume");
         threading::GAThreading::performTaskOnGAThread([]()
         {
             if(!state::GAState::useManualSessionHandling())
@@ -501,6 +506,7 @@ namespace gameanalytics
 
     void GameAnalytics::onSuspend()
     {
+        logging::GALogger::ii("SORB GameAnalytics::onSuspend");
         try
         {
             threading::GAThreading::performTaskOnGAThread([]()
@@ -515,6 +521,7 @@ namespace gameanalytics
 
     void GameAnalytics::onQuit()
     {
+        logging::GALogger::ii("SORB GameAnalytics::onQuit");
         try
         {
             threading::GAThreading::performTaskOnGAThread([]()

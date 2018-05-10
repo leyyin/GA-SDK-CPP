@@ -23,13 +23,11 @@ namespace gameanalytics
         const std::string GAEvents::CategoryProgression = "progression";
         const std::string GAEvents::CategoryResource = "resource";
         const std::string GAEvents::CategoryError = "error";
-        const double GAEvents::ProcessEventsIntervalInSeconds = 8.0;
+        double GAEvents::ProcessEventsIntervalInSeconds = 8.0;
         const int GAEvents::MaxEventCount = 500;
 
         GAEvents::GAEvents()
         {
-            isRunning = false;
-            keepRunning = false;
         }
 
         void GAEvents::stopEventQueue()
@@ -356,7 +354,7 @@ namespace gameanalytics
             // Check for errors or empty
             if (events.empty())
             {
-                logging::GALogger::i("Event queue: No events to send");
+                //logging::GALogger::i("Event queue: No events to send");
                 GAEvents::updateSessionTime();
                 return;
             }
@@ -492,7 +490,7 @@ namespace gameanalytics
 
                 auto length = event_ts - start_ts;
 
-                logging::GALogger::d("fixMissingSessionEndEvents length calculated: " + std::to_string(static_cast<int>(length)));
+                logging::GALogger::ii("fixMissingSessionEndEvents length calculated: " + std::to_string(static_cast<int>(length)));
 
                 sessionEndEvent["category"] = GAEvents::CategorySessionEnd;
                 sessionEndEvent["length"] = length;

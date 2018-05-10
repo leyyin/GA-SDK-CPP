@@ -44,10 +44,6 @@ namespace gameanalytics
             Windows::Storage::StorageFolder^ gaFolder = concurrency::create_task(Windows::Storage::ApplicationData::Current->LocalFolder->CreateFolderAsync("GameAnalytics", Windows::Storage::CreationCollisionOption::OpenIfExists)).get();
             file = concurrency::create_task(gaFolder->CreateFileAsync("ga_log.txt", Windows::Storage::CreationCollisionOption::ReplaceExisting)).get();
 #endif
-
-#if !USE_UWP && !USE_TIZEN
-            logInitialized = false;
-#endif
         }
 
         void GALogger::setInfoLog(bool enabled)
@@ -65,12 +61,51 @@ namespace gameanalytics
         {
             GALogger *ga = GALogger::sharedInstance();
 
-            if(!ga->logInitialized)
+            if (!ga->logInitialized)
             {
                 std::string p(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparator() + "ga_log.txt");
                 std::vector<spdlog::sink_ptr> sinks;
-                sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_st>());
-                sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_st>(p, 1048576 * 5, 3));
+                sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_mt>());
+                sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_mt>(p, 1048576 * 5, 3));
+                ga->logger = std::make_shared<spdlog::logger>("gameanalytics", begin(sinks), end(sinks));
+
+                try 
+                {
+                    if(ga->debugEnabled)
+                    {
+                        ga->logger->flush_on(spdlog::level::debug);
+                        spdlog::set_level(spdlog::level::debug);
+                    }
+                    else
+                    {
+                        ga->logger->flush_on(spdlog::level::info);
+                        spdlog::set_level(spdlog::level::info);
+                    }
+                    spdlog::register_logger(ga->logger);
+                }
+                catch (spdlog::spdlog_ex& e)
+                {
+                    std::cerr << "Unexpected spdlog::spdlog_ex occured inside GALogger::initializeLog" << " with message = " << e.what();
+                    std::cout << "Unexpected spdlog::spdlog_ex occured inside GALogger::initializeLog" << " with message = " << e.what();
+                    throw;
+                }
+
+                ga->logInitialized = true;
+                GALogger::i("Log file added under: " + device::GADevice::getWritablePath());
+            }
+        }
+
+        void GALogger::customInitializeLog()
+        {
+            GALogger *ga = GALogger::sharedInstance();
+
+            try 
+            {
+                spdlog::drop("gameanalytics");
+                std::string p(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparator() + "ga_log.txt");
+                std::vector<spdlog::sink_ptr> sinks;
+                sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_mt>());
+                sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_mt>(p, 1048576 * 5, 3));
                 ga->logger = std::make_shared<spdlog::logger>("gameanalytics", begin(sinks), end(sinks));
 
                 if(ga->debugEnabled)
@@ -83,63 +118,45 @@ namespace gameanalytics
                     ga->logger->flush_on(spdlog::level::info);
                     spdlog::set_level(spdlog::level::info);
                 }
-
                 spdlog::register_logger(ga->logger);
-
-                ga->logInitialized = true;
-
-                GALogger::i("Log file added under: " + device::GADevice::getWritablePath());
             }
-        }
-
-        void GALogger::customInitializeLog()
-        {
-            GALogger *ga = GALogger::sharedInstance();
-
-            spdlog::drop("gameanalytics");
-            std::string p(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparator() + "ga_log.txt");
-            std::vector<spdlog::sink_ptr> sinks;
-            sinks.push_back(std::make_shared<spdlog::sinks::stdout_sink_st>());
-            sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_st>(p, 1048576 * 5, 3));
-            ga->logger = std::make_shared<spdlog::logger>("gameanalytics", begin(sinks), end(sinks));
-
-            if(ga->debugEnabled)
+            catch (spdlog::spdlog_ex& e)
             {
-                ga->logger->flush_on(spdlog::level::debug);
-                spdlog::set_level(spdlog::level::debug);
+                std::cerr << "Unexpected spdlog::spdlog_ex occured inside GALogger::customInitializeLog " << "with message = " << e.what();
+                throw;
             }
-            else
-            {
-                ga->logger->flush_on(spdlog::level::info);
-                spdlog::set_level(spdlog::level::info);
-            }
-
-            spdlog::register_logger(ga->logger);
 
             ga->logInitialized = true;
-
             GALogger::i("Log file added under: " + device::GADevice::getWritablePath());
         }
 
         void GALogger::addCustomLogStream(std::ostream& os)
         {
-            spdlog::drop("gameanalytics_stream");
-            GALogger *ga = GALogger::sharedInstance();
-            auto ostream_sink = std::make_shared<spdlog::sinks::ostream_sink_st>(os);
-            ga->custom_logger = std::make_shared<spdlog::logger>("gameanalytics_stream", ostream_sink);
-
-            if(ga->debugEnabled)
+            try 
             {
-                ga->custom_logger->flush_on(spdlog::level::debug);
-                spdlog::set_level(spdlog::level::debug);
-            }
-            else
-            {
-                ga->custom_logger->flush_on(spdlog::level::info);
-                spdlog::set_level(spdlog::level::info);
-            }
+                spdlog::drop("gameanalytics_stream");
+                GALogger *ga = GALogger::sharedInstance();
+                auto ostream_sink = std::make_shared<spdlog::sinks::ostream_sink_mt>(os);
+                ga->custom_logger = std::make_shared<spdlog::logger>("gameanalytics_stream", ostream_sink);
 
-            spdlog::register_logger(ga->custom_logger);
+                if (ga->debugEnabled)
+                {
+                    ga->custom_logger->flush_on(spdlog::level::debug);
+                    spdlog::set_level(spdlog::level::debug);
+                }
+                else
+                {
+                    ga->custom_logger->flush_on(spdlog::level::info);
+                    spdlog::set_level(spdlog::level::info);
+                }
+
+                spdlog::register_logger(ga->custom_logger);
+            }
+            catch (spdlog::spdlog_ex& e)
+            {
+                std::cerr << "Unexpected spdlog::spdlog_ex occured inside GALogger::addCustomLogStream " << "with message = " << e.what();
+                throw;
+            }
         }
 #endif
 
@@ -244,6 +261,9 @@ namespace gameanalytics
                 initializeLog();
             }
 #endif
+
+            try 
+            {
             switch(type)
             {
                 case Error:
@@ -329,6 +349,13 @@ namespace gameanalytics
                     }
 #endif
                     break;
+            }
+
+            }
+            catch (spdlog::spdlog_ex& e)
+            {
+                std::cerr << "Unexpected spdlog::spdlog_ex occured inside GALogger::sendNotificationMessage " << "with message = " << e.what();
+                throw;
             }
         }
 

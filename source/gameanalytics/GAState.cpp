@@ -347,6 +347,8 @@ namespace gameanalytics
 
         void GAState::internalInitialize()
         {
+            logging::GALogger::ii("SORB: GAState::internalInitialize");
+            
             // Make sure database is ready
             if (!store::GAStore::sharedInstance()->getTableReady())
             {
@@ -362,12 +364,14 @@ namespace gameanalytics
 
             if (isEnabled())
             {
+                logging::GALogger::ii("SORB: GAState::internalInitialize calling events::GAEvents::ensureEventQueueIsRunning");
                 events::GAEvents::ensureEventQueueIsRunning();
             }
         }
 
         void GAState::resumeSessionAndStartQueue()
         {
+            logging::GALogger::ii("SORB: GAState::resumeSessionAndStartQueue");
             if(!GAState::isInitialized())
             {
                 return;
@@ -382,6 +386,7 @@ namespace gameanalytics
 
         void GAState::endSessionAndStopQueue(bool endThread)
         {
+            logging::GALogger::ii("SORB: GAState::endSessionAndStopQueue");
             if(GAState::isInitialized())
             {
                 logging::GALogger::i("Ending session.");
