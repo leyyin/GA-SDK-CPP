@@ -13,6 +13,7 @@
 #include <Foundation/GAThreadHelpers.h>
 #include <vector>
 #include <chrono>
+#include <mutex>
 #include <memory>
 #endif
 
@@ -64,7 +65,9 @@ namespace gameanalytics
 
             static bool IsThreadRunning();
 
-            static double MainThreadWaitInSeconds;
+            static double GetThreadWaitSeconds();
+            static void SetThreadWaitSeconds(double NewInterval);
+
          private:
 
 #if USE_TIZEN
@@ -135,7 +138,8 @@ namespace gameanalytics
 
             static void initIfNeeded();
 
-            static int MainThreadWaitSeconds;
+            static double threadWaitInSeconds;
+            static std::mutex instanceMutex;
         };
     }
 }

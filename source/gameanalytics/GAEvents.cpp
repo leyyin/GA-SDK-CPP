@@ -23,11 +23,20 @@ namespace gameanalytics
         const std::string GAEvents::CategoryProgression = "progression";
         const std::string GAEvents::CategoryResource = "resource";
         const std::string GAEvents::CategoryError = "error";
-        double GAEvents::ProcessEventsIntervalInSeconds = 8.0;
         const int GAEvents::MaxEventCount = 500;
 
         GAEvents::GAEvents()
         {
+        }
+
+        double GAEvents::GetEventsPollIntervalSeconds()
+        {
+            return GAEvents::sharedInstance()->eventsPollIntervalSeconds;
+        }
+
+        void GAEvents::SetEventsPollIntervalSeconds(double NewInterval)
+        {
+            GAEvents::sharedInstance()->eventsPollIntervalSeconds = NewInterval;
         }
 
         void GAEvents::stopEventQueue()
@@ -41,7 +50,7 @@ namespace gameanalytics
             if (!GAEvents::sharedInstance()->isRunning)
             {
                 GAEvents::sharedInstance()->isRunning = true;
-                threading::GAThreading::scheduleTimer(GAEvents::ProcessEventsIntervalInSeconds, processEventQueue);
+                threading::GAThreading::scheduleTimer(GAEvents::sharedInstance()->eventsPollIntervalSeconds, processEventQueue);
             }
         }
 
@@ -314,7 +323,7 @@ namespace gameanalytics
             processEvents("", true);
             if (GAEvents::sharedInstance()->keepRunning)
             {
-                threading::GAThreading::scheduleTimer(GAEvents::ProcessEventsIntervalInSeconds, processEventQueue);
+                threading::GAThreading::scheduleTimer(GAEvents::sharedInstance()->eventsPollIntervalSeconds, processEventQueue);
             }
             else
             {

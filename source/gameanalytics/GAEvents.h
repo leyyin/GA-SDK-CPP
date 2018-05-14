@@ -32,7 +32,8 @@ namespace gameanalytics
             static const std::string errorSeverityString(EGAErrorSeverity errorSeverity);
             static const std::string resourceFlowTypeString(EGAResourceFlowType flowType);
 
-            static double ProcessEventsIntervalInSeconds;
+            static double GetEventsPollIntervalSeconds();
+            static void SetEventsPollIntervalSeconds(double NewInterval);
             
          private:
             static void processEventQueue();
@@ -52,6 +53,7 @@ namespace gameanalytics
             static const std::string CategoryError;
             static const int MaxEventCount;
 
+            double eventsPollIntervalSeconds = 8.0;
             bool isRunning = false;
             bool keepRunning = false;
         };
