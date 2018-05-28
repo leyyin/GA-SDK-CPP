@@ -123,6 +123,7 @@ namespace gameanalytics
             catch (spdlog::spdlog_ex& e)
             {
                 std::cerr << "Unexpected spdlog::spdlog_ex occured inside GALogger::customInitializeLog " << "with message = " << e.what();
+                std::cout << "Unexpected spdlog::spdlog_ex occured inside GALogger::customInitializeLog " << "with message = " << e.what();
                 throw;
             }
 
@@ -147,6 +148,7 @@ namespace gameanalytics
             catch (spdlog::spdlog_ex& e)
             {
                 std::cerr << "Unexpected spdlog::spdlog_ex occured inside GALogger::addCustomLogStream " << "with message = " << e.what();
+                std::cout << "Unexpected spdlog::spdlog_ex occured inside GALogger::addCustomLogStream " << "with message = " << e.what();
                 throw;
             }
         }

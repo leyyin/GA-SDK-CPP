@@ -459,7 +459,7 @@ namespace gameanalytics
 
     void GameAnalytics::startSession()
     {
-        logging::GALogger::ii("SORB GameAnalytics::startSession");
+        //logging::GALogger::ii("SORB GameAnalytics::startSession");
         threading::GAThreading::performTaskOnGAThread([]()
         {
             logging::GALogger::ii("SORB (inside thread) GameAnalytics::startSession");
@@ -482,7 +482,7 @@ namespace gameanalytics
 
     void GameAnalytics::endSession()
     {
-        logging::GALogger::ii("SORB GameAnalytics::endSession");
+        //logging::GALogger::ii("SORB GameAnalytics::endSession");
         if (state::GAState::useManualSessionHandling())
         {
             onSuspend();
@@ -494,9 +494,9 @@ namespace gameanalytics
 
     void GameAnalytics::onResume()
     {
-        logging::GALogger::ii("SORB GameAnalytics::onResume");
         threading::GAThreading::performTaskOnGAThread([]()
         {
+            logging::GALogger::ii("SORB (inside thread) GameAnalytics::onResume");
             if(!state::GAState::useManualSessionHandling())
             {
                 state::GAState::resumeSessionAndStartQueue();
@@ -506,11 +506,11 @@ namespace gameanalytics
 
     void GameAnalytics::onSuspend()
     {
-        logging::GALogger::ii("SORB GameAnalytics::onSuspend");
         try
         {
             threading::GAThreading::performTaskOnGAThread([]()
             {
+                logging::GALogger::ii("SORB (inside thread)  GameAnalytics::onSuspend");
                 state::GAState::endSessionAndStopQueue(false);
             });
         }
@@ -521,11 +521,11 @@ namespace gameanalytics
 
     void GameAnalytics::onQuit()
     {
-        logging::GALogger::ii("SORB GameAnalytics::onQuit");
         try
         {
             threading::GAThreading::performTaskOnGAThread([]()
             {
+                logging::GALogger::ii("SORB (inside thread) GameAnalytics::onQuit");
                 state::GAState::endSessionAndStopQueue(true);
             });
         }
