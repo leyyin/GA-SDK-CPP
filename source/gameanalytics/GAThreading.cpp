@@ -130,6 +130,8 @@ namespace gameanalytics
 
                     std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(threadWaitInSeconds * 1000)));
                 }
+
+                logging::GALogger::d("thread_routine stopped");
             }
             catch(const std::exception& e)
             {

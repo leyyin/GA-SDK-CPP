@@ -7,14 +7,16 @@ import platform
 import sys
 import getopt
 import subprocess
-import re
 import config as Config
 import libs.tools as LibTools
 import shutil
 import fileinput
 
 if platform.system() == 'Windows':
-    from _winreg import *
+    from _winreg import ConnectRegistry
+    from _winreg import HKEY_LOCAL_MACHINE
+    from _winreg import OpenKey
+    from _winreg import QueryValueEx
 
 if os.name == "nt":
     __CSL = None
