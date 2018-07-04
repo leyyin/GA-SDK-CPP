@@ -42,6 +42,7 @@ namespace gameanalytics
             static const std::string deviceModel();
             static const std::string runtimePlatformToString();
             static const std::string getPersistentPath();
+            static void InitializedStaticVariables();
 #if USE_UWP
             static const std::string deviceId();
 
@@ -54,7 +55,7 @@ namespace gameanalytics
 #endif
 
             static const std::string _buildPlatform;
-            static const std::string _osVersion;
+            static std::string _osVersion;
             static std::string _deviceModel;
             static std::string _deviceManufacturer;
             static std::string _writablepath;
@@ -62,6 +63,7 @@ namespace gameanalytics
             static std::string _gameEngineVersion;
             static std::string _connectionType;
             static const std::string _sdkWrapperVersion;
+            static bool _initializedStaticVariables;
         };
     }
 }

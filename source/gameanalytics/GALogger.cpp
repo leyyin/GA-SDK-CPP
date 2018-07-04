@@ -28,6 +28,15 @@ namespace gameanalytics
     {
         const std::string GALogger::tag = "GameAnalytics";
 
+        static void LogSpdException(const std::string& context, const spdlog::spdlog_ex& e)
+        {
+            std::stringstream ss;
+            ss << context << ": Unexpected spdlog::spdlog_ex occurred with message = `" << e.what() << "`";
+            const std::string message = ss.str();
+            std::cerr << message << std::endl;
+            std::cout << message << std::endl;
+        }
+
         GALogger::GALogger()
         {
             infoLogEnabled = false;
@@ -71,7 +80,7 @@ namespace gameanalytics
 
                 try 
                 {
-                    if(ga->debugEnabled)
+                    if (ga->debugEnabled)
                     {
                         ga->logger->flush_on(spdlog::level::debug);
                         spdlog::set_level(spdlog::level::debug);
@@ -85,8 +94,7 @@ namespace gameanalytics
                 }
                 catch (spdlog::spdlog_ex& e)
                 {
-                    std::cerr << "Unexpected spdlog::spdlog_ex occured inside GALogger::initializeLog" << " with message = " << e.what();
-                    std::cout << "Unexpected spdlog::spdlog_ex occured inside GALogger::initializeLog" << " with message = " << e.what();
+                    LogSpdException("GALogger::initializeLog", e);
                     throw;
                 }
 
@@ -122,8 +130,7 @@ namespace gameanalytics
             }
             catch (spdlog::spdlog_ex& e)
             {
-                std::cerr << "Unexpected spdlog::spdlog_ex occured inside GALogger::customInitializeLog " << "with message = " << e.what();
-                std::cout << "Unexpected spdlog::spdlog_ex occured inside GALogger::customInitializeLog " << "with message = " << e.what();
+                LogSpdException("GALogger::customInitializeLog", e);
                 throw;
             }
 
@@ -147,8 +154,7 @@ namespace gameanalytics
             }
             catch (spdlog::spdlog_ex& e)
             {
-                std::cerr << "Unexpected spdlog::spdlog_ex occured inside GALogger::addCustomLogStream " << "with message = " << e.what();
-                std::cout << "Unexpected spdlog::spdlog_ex occured inside GALogger::addCustomLogStream " << "with message = " << e.what();
+                LogSpdException("GALogger::addCustomLogStream", e);
                 throw;
             }
         }
@@ -348,7 +354,7 @@ namespace gameanalytics
             }
             catch (spdlog::spdlog_ex& e)
             {
-                std::cerr << "Unexpected spdlog::spdlog_ex occured inside GALogger::sendNotificationMessage " << "with message = " << e.what();
+                LogSpdException("GALogger::sendNotificationMessage", e);
                 throw;
             }
         }

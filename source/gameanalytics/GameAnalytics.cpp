@@ -283,7 +283,8 @@ namespace gameanalytics
 #endif
         threading::GAThreading::performTaskOnGAThread([gameKey, gameSecret]()
         {
-            logging::GALogger::ii("SORB (inside thread) GameAnalytics::initialize");
+            //logging::GALogger::ii("SORB (inside thread) GameAnalytics::initialize");
+            logging::GALogger::i("WritablePath: " + device::GADevice::getWritablePath());
             if (isSdkReady(true, false))
             {
                 logging::GALogger::w("SDK already initialized. Can only be called once.");
@@ -291,7 +292,7 @@ namespace gameanalytics
             }
             if (!validators::GAValidator::validateKeys(gameKey, gameSecret))
             {
-                logging::GALogger::w("SDK failed initialize. Game key or secret key is invalid. Can only contain characters A-z 0-9, gameKey is 32 length, gameSecret is 40 length. Failed keys - gameKey: " + std::string(gameKey) + ", secretKey: " + std::string(gameSecret));
+                logging::GALogger::w("SDK failed initialize. Game key or secret key is invalid. Can only contain characters A-z 0-9, gameKey is 32 length, gameSecret is 40 length. Failed keys - gameKey = `" + std::string(gameKey) + "`, secretKey = `" + std::string(gameSecret) + "`");
                 return;
             }
 
@@ -528,7 +529,7 @@ namespace gameanalytics
         //logging::GALogger::ii("SORB GameAnalytics::startSession");
         threading::GAThreading::performTaskOnGAThread([]()
         {
-            logging::GALogger::ii("SORB (inside thread) GameAnalytics::startSession");
+            //logging::GALogger::ii("SORB (inside thread) GameAnalytics::startSession");
             if(state::GAState::useManualSessionHandling())
             {
                 if (!state::GAState::isInitialized())
@@ -562,7 +563,7 @@ namespace gameanalytics
     {
         threading::GAThreading::performTaskOnGAThread([]()
         {
-            logging::GALogger::ii("SORB (inside thread) GameAnalytics::onResume");
+            //logging::GALogger::ii("SORB (inside thread) GameAnalytics::onResume");
             if(!state::GAState::useManualSessionHandling())
             {
                 state::GAState::resumeSessionAndStartQueue();
@@ -572,32 +573,20 @@ namespace gameanalytics
 
     void GameAnalytics::onSuspend()
     {
-        try
+        threading::GAThreading::performTaskOnGAThread([]()
         {
-            threading::GAThreading::performTaskOnGAThread([]()
-            {
-                logging::GALogger::ii("SORB (inside thread)  GameAnalytics::onSuspend");
-                state::GAState::endSessionAndStopQueue(false);
-            });
-        }
-        catch (const std::exception&)
-        {
-        }
+            //logging::GALogger::ii("SORB (inside thread)  GameAnalytics::onSuspend");
+            state::GAState::endSessionAndStopQueue(false);
+        });
     }
 
     void GameAnalytics::onQuit()
     {
-        try
+        threading::GAThreading::performTaskOnGAThread([]()
         {
-            threading::GAThreading::performTaskOnGAThread([]()
-            {
-                logging::GALogger::ii("SORB (inside thread) GameAnalytics::onQuit");
-                state::GAState::endSessionAndStopQueue(true);
-            });
-        }
-        catch (const std::exception&)
-        {
-        }
+            //logging::GALogger::ii("SORB (inside thread) GameAnalytics::onQuit");
+            state::GAState::endSessionAndStopQueue(true);
+        });
     }
 
 #if !USE_UWP && !USE_TIZEN

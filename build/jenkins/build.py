@@ -629,11 +629,9 @@ def build(target_name, vs, silent=False):
 
 
 def build_targets(target_names, silent=False, vs="2017", skip_tizen=False):
-
+    print("target_names=", target_names)
     for target_name in target_names:
         if skip_tizen and 'tizen' in target_name:
-            continue
-        if skip_tizen and 'clang' in target_name:
             continue
         print("")
         print("-----------------------------------------")

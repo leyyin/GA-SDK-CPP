@@ -21,6 +21,7 @@
 
 #include "GADevice.h"
 #include "GAUtilities.h"
+#include <iostream>
 #if USE_UWP
 #include <Windows.h>
 #include <sstream>
@@ -48,15 +49,17 @@
 #elif IS_LINUX
 #include <sys/utsname.h>
 #include <cctype>
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
 #endif
 
 namespace gameanalytics
 {
     namespace device
     {
-        std::string GADevice::_writablepath = GADevice::getPersistentPath();
         const std::string GADevice::_buildPlatform = GADevice::runtimePlatformToString();
-        const std::string GADevice::_osVersion = GADevice::getOSVersionString();
+        bool GADevice::_initializedStaticVariables = false;
         std::string GADevice::_deviceModel = GADevice::deviceModel();
 #if USE_UWP
         const std::string GADevice::_advertisingId = utilities::GAUtilities::ws2s(Windows::System::UserProfile::AdvertisingManager::AdvertisingId->Data());
@@ -65,6 +68,8 @@ namespace gameanalytics
         const std::string GADevice::_deviceId = GADevice::deviceId();
 #endif
         std::string GADevice::_deviceManufacturer = GADevice::deviceManufacturer();
+        std::string GADevice::_writablepath;
+        std::string GADevice::_osVersion;
         std::string GADevice::_sdkGameEngineVersion;
         std::string GADevice::_gameEngineVersion;
         std::string GADevice::_connectionType = "";
@@ -75,6 +80,19 @@ namespace gameanalytics
 #else
         const std::string GADevice::_sdkWrapperVersion = "cpp 1.4.5";
 #endif
+
+        void GADevice::InitializedStaticVariables()
+        {
+            if (_initializedStaticVariables)
+                return;
+
+            _initializedStaticVariables = true;
+            if (GADevice::_writablepath.empty())
+                GADevice::_writablepath = GADevice::getPersistentPath();
+            
+            if (GADevice::_osVersion.empty())
+                GADevice::_osVersion = GADevice::getOSVersionString();
+        }
 
         void GADevice::setSdkGameEngineVersion(const std::string& sdkGameEngineVersion)
         {
@@ -118,6 +136,7 @@ namespace gameanalytics
 
         const std::string GADevice::getOSVersion()
         {
+            InitializedStaticVariables();
             return GADevice::_osVersion;
         }
 
@@ -148,6 +167,7 @@ namespace gameanalytics
 
         const std::string GADevice::getWritablePath()
         {
+            InitializedStaticVariables();
             return GADevice::_writablepath;
         }
 
@@ -560,9 +580,42 @@ namespace gameanalytics
             _mkdir(result.c_str());
             return result;
 #else
-            std::string result = std::getenv("HOME") + utilities::GAUtilities::getPathSeparator() + "GameAnalytics";
-            mode_t nMode = 0733;
-            mkdir(result.c_str(),nMode);
+            // Make it hidden on linux
+            // Try variable first
+            const char* homedir = nullptr;
+            if ((homedir = std::getenv("HOME")) == nullptr) {
+                if (const struct passwd* pwd = getpwuid(getuid()))
+                    homedir = pwd->pw_dir;
+            }
+
+            // Start crying
+            if (homedir == nullptr)
+            {
+                std::stringstream ss;
+                ss << "GADevice::getPersistentPath: can't get home directory";
+                const std::string message = ss.str();
+                std::cerr << message << std::endl;
+                std::cout << message << std::endl;
+                throw message;
+                return message;
+            }
+
+            std::stringstream result_stream;
+            result_stream << homedir << utilities::GAUtilities::getPathSeparator() << ".GameAnalytics";
+            const std::string result = result_stream.str();
+            std::cout << "GADevice::getPersistentPath: path = `" << result << "`" << std::endl;
+
+            const mode_t nMode = 0733;
+            const int status = mkdir(result.c_str(), nMode);
+            if (status != 0)
+            {
+                std::stringstream ss;
+                ss << "GADevice::getPersistentPath: mkdir failed for directory = `" << result << "`";
+                const std::string message = ss.str();
+                std::cerr << message << std::endl;
+                std::cout << message << std::endl;
+            }
+
             return result;
 #endif
 #endif
