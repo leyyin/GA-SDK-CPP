@@ -16,7 +16,6 @@ namespace gameanalytics
     namespace threading
     {
         // static members
-        std::shared_ptr<GAThreading::State> GAThreading::state;
         double GAThreading::threadWaitInSeconds = 1.0;
         std::mutex GAThreading::instanceMutex;
 
@@ -54,13 +53,13 @@ namespace gameanalytics
                 return false;
             }
 
-            GAThreadHelpers::scoped_lock lock(state->mutex);
+            std::lock_guard<std::mutex> lock(instanceMutex);
             return !state->blocks.empty();
         }
 
         bool GAThreading::IsThreadRunning()
         {
-            return state ? !state->endThread : false;
+            return state ? !_endThread : false;
         }
 
         void GAThreading::performTaskOnGAThread(const Block& taskBlock)
@@ -77,8 +76,7 @@ namespace gameanalytics
         void GAThreading::endThread()
         {
             logging::GALogger::ii("ending thread");
-            GAThreadHelpers::scoped_lock lock(state->mutex);
-            state->endThread = true;
+            std::lock_guard<std::mutex> lock(instanceMutex);
             _endThread = true;
         }
 
