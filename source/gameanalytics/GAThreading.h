@@ -119,8 +119,7 @@ namespace gameanalytics
 
             static void initIfNeeded();
 
-            static double threadWaitInSeconds;
-            static std::mutex instanceMutex;
+            static std::atomic<double> threadWaitInSeconds;
         };
     }
 }

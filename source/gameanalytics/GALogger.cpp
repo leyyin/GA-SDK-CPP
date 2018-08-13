@@ -40,7 +40,8 @@ namespace gameanalytics
         GALogger::GALogger()
         {
             infoLogEnabled = false;
-
+            infoLogVerboseEnabled = false;
+            logInitialized = false;
 
 #if defined(_DEBUG)
             // log debug is in dev mode
@@ -144,7 +145,7 @@ namespace gameanalytics
             {
                 spdlog::drop("gameanalytics_stream");
                 GALogger *ga = GALogger::sharedInstance();
-                auto ostream_sink = std::make_shared<spdlog::sinks::ostream_sink_st>(os);
+                auto ostream_sink = std::make_shared<spdlog::sinks::ostream_sink_mt>(os);
                 ga->custom_logger = std::make_shared<spdlog::logger>("gameanalytics_stream", ostream_sink);
 
                 ga->custom_logger->flush_on(spdlog::level::info);

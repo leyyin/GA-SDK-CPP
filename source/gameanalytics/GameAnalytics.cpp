@@ -686,20 +686,34 @@ namespace gameanalytics
 
     void GameAnalytics::onSuspend()
     {
-        threading::GAThreading::performTaskOnGAThread([]()
+        try
         {
-            //logging::GALogger::ii("SORB (inside thread)  GameAnalytics::onSuspend");
-            state::GAState::endSessionAndStopQueue(false);
-        });
+            threading::GAThreading::performTaskOnGAThread([]()
+            {
+                //logging::GALogger::ii("SORB (inside thread)  GameAnalytics::onSuspend");
+                state::GAState::endSessionAndStopQueue(false);
+            });
+        }
+        catch (const std::exception&)
+        {
+            // Ignore
+        }
     }
 
     void GameAnalytics::onQuit()
     {
-        threading::GAThreading::performTaskOnGAThread([]()
+        try
         {
-            //logging::GALogger::ii("SORB (inside thread) GameAnalytics::onQuit");
-            state::GAState::endSessionAndStopQueue(true);
-        });
+            threading::GAThreading::performTaskOnGAThread([]()
+            {
+                //logging::GALogger::ii("SORB (inside thread) GameAnalytics::onQuit");
+                state::GAState::endSessionAndStopQueue(true);
+            });
+        }
+        catch (const std::exception&)
+        {
+            // Ignore
+        }
     }
 
 #if !USE_UWP && !USE_TIZEN

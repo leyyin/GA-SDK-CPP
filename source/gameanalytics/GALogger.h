@@ -8,6 +8,7 @@
 #include <Foundation/GASingleton.h>
 #include <string>
 #include <memory>
+#include <atomic>
 #if !USE_UWP && !USE_TIZEN
 #include <spdlog/spdlog.h>
 #endif
@@ -51,9 +52,9 @@ namespace gameanalytics
             static void initializeLog();
 #endif
             // Settings
-            bool infoLogEnabled = false;
-            bool infoLogVerboseEnabled = false;
-            bool debugEnabled = false;
+            std::atomic<bool> infoLogEnabled;
+            std::atomic<bool> infoLogVerboseEnabled;
+            std::atomic<bool> debugEnabled;
             static const std::string tag;
 #if USE_UWP
             static void LogMessageToConsole(Platform::Object^ parameter);
@@ -61,7 +62,7 @@ namespace gameanalytics
 #endif
 #if !USE_UWP && !USE_TIZEN
             std::shared_ptr<spdlog::logger> logger;
-            bool logInitialized = false;
+            std::atomic<bool> logInitialized;
             std::shared_ptr<spdlog::logger> custom_logger;
 #endif
         };

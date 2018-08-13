@@ -27,6 +27,9 @@ namespace gameanalytics
 
         GAEvents::GAEvents()
         {
+            eventsPollIntervalSeconds = 8.0;
+            isRunning = false;
+            keepRunning = false;
         }
 
         double GAEvents::GetEventsPollIntervalSeconds()

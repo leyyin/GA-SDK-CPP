@@ -16,21 +16,18 @@ namespace gameanalytics
     namespace threading
     {
         // static members
-        double GAThreading::threadWaitInSeconds = 1.0;
-        std::mutex GAThreading::instanceMutex;
+        std::atomic<double> GAThreading::threadWaitInSeconds{1.0};
 
         std::atomic<bool> GAThreading::_endThread(false);
         std::unique_ptr<GAThreading::State> GAThreading::state(new GAThreading::State(GAThreading::thread_routine));
 
         double GAThreading::GetThreadWaitSeconds()
         {
-            std::lock_guard<std::mutex> lock(instanceMutex);
             return threadWaitInSeconds;
         }
 
         void GAThreading::SetThreadWaitSeconds(double NewInterval)
         {
-            std::lock_guard<std::mutex> lock(instanceMutex);
             threadWaitInSeconds = NewInterval;
         }
 
@@ -40,9 +37,8 @@ namespace gameanalytics
             {
                 return;
             }
-            std::lock_guard<std::mutex> lock(state->mutex);
 
-            state->blocks.push_back({ callback, std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(1000 * interval)) } );
+            std::lock_guard<std::mutex> lock(state->mutex);
             std::push_heap(state->blocks.begin(), state->blocks.end());
         }
 
@@ -53,13 +49,13 @@ namespace gameanalytics
                 return false;
             }
 
-            std::lock_guard<std::mutex> lock(instanceMutex);
+            std::lock_guard<std::mutex> lock(state->mutex);
             return !state->blocks.empty();
         }
 
         bool GAThreading::IsThreadRunning()
         {
-            return state ? !_endThread : false;
+            return !_endThread;
         }
 
         void GAThreading::performTaskOnGAThread(const Block& taskBlock)
@@ -68,6 +64,7 @@ namespace gameanalytics
             {
                 return;
             }
+
             std::lock_guard<std::mutex> lock(state->mutex);
             state->blocks.push_back({ taskBlock, std::chrono::steady_clock::now()} );
             std::push_heap(state->blocks.begin(), state->blocks.end());
@@ -76,7 +73,6 @@ namespace gameanalytics
         void GAThreading::endThread()
         {
             logging::GALogger::ii("ending thread");
-            std::lock_guard<std::mutex> lock(instanceMutex);
             _endThread = true;
         }
 

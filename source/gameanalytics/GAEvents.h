@@ -8,6 +8,7 @@
 #include <string>
 #include "Foundation/GASingleton.h"
 #include "GameAnalytics.h"
+#include <atomic>
 #include <json/json.h>
 
 namespace gameanalytics
@@ -54,9 +55,9 @@ namespace gameanalytics
             static const std::string CategoryError;
             static const int MaxEventCount;
 
-            double eventsPollIntervalSeconds = 8.0;
-            bool isRunning = false;
-            bool keepRunning = false;
+            std::atomic<double> eventsPollIntervalSeconds;
+            std::atomic<bool> isRunning;
+            std::atomic<bool> keepRunning;
         };
     }
 }
