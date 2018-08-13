@@ -11,7 +11,7 @@ void configureAvailableCustomDimensions01(const char *customDimensionsJson)
 
     for (unsigned int index = 0; index < json.size(); ++index)
     {
-        list.push_back(json[index].asString());
+        list.push_back(json[index].asString().c_str());
     }
 
     gameanalytics::GameAnalytics::configureAvailableCustomDimensions01(list);
@@ -24,7 +24,7 @@ void configureAvailableCustomDimensions02(const char *customDimensionsJson)
 
     for (unsigned int index = 0; index < json.size(); ++index)
     {
-        list.push_back(json[index].asString());
+        list.push_back(json[index].asString().c_str());
     }
 
     gameanalytics::GameAnalytics::configureAvailableCustomDimensions02(list);
@@ -37,7 +37,7 @@ void configureAvailableCustomDimensions03(const char *customDimensionsJson)
 
     for (unsigned int index = 0; index < json.size(); ++index)
     {
-        list.push_back(json[index].asString());
+        list.push_back(json[index].asString().c_str());
     }
 
     gameanalytics::GameAnalytics::configureAvailableCustomDimensions03(list);
@@ -50,7 +50,7 @@ void configureAvailableResourceCurrencies(const char *resourceCurrenciesJson)
 
     for (unsigned int index = 0; index < json.size(); ++index)
     {
-        list.push_back(json[index].asString());
+        list.push_back(json[index].asString().c_str());
     }
 
     gameanalytics::GameAnalytics::configureAvailableResourceCurrencies(list);
@@ -63,7 +63,7 @@ void configureAvailableResourceItemTypes(const char *resourceItemTypesJson)
 
     for (unsigned int index = 0; index < json.size(); ++index )
     {
-        list.push_back(json[index].asString());
+        list.push_back(json[index].asString().c_str());
     }
 
     gameanalytics::GameAnalytics::configureAvailableResourceItemTypes(list);
@@ -115,9 +115,9 @@ void initialize(const char *gameKey, const char *gameSecret)
 }
 
 // add events
-void addBusinessEvent(const char *currency, double amount, const char *itemType, const char *itemId, const char *cartType)
+void addBusinessEvent(const char *currency, double amount, const char *itemType, const char *itemId, const char *cartType/*, const char *fields*/)
 {
-    gameanalytics::GameAnalytics::addBusinessEvent(currency, (int)amount, itemType, itemId, cartType);
+    gameanalytics::GameAnalytics::addBusinessEvent(currency, (int)amount, itemType, itemId, cartType/*, fields*/);
 }
 
 void addBusinessEventJson(const char *jsonArgs)
@@ -126,14 +126,14 @@ void addBusinessEventJson(const char *jsonArgs)
 
     if(json.size() == 5)
     {
-        gameanalytics::GameAnalytics::addBusinessEvent(json[0].asString().c_str(), (int)(json[1].asDouble()), json[2].asString().c_str(), json[3].asString().c_str(), json[4].asString().c_str());
+        gameanalytics::GameAnalytics::addBusinessEvent(json[0].asString().c_str(), (int)(json[1].asDouble()), json[2].asString().c_str(), json[3].asString().c_str(), json[4].asString().c_str()/*, json[5].asString().c_str()*/);
     }
 }
 
-void addResourceEvent(double flowType, const char *currency, double amount, const char *itemType, const char *itemId)
+void addResourceEvent(double flowType, const char *currency, double amount, const char *itemType, const char *itemId/*, const char *fields*/)
 {
     int flowTypeInt = (int)flowType;
-    gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, currency, (float)amount, itemType, itemId);
+    gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, currency, (float)amount, itemType, itemId/*, fields*/);
 }
 
 void addResourceEventJson(const char *jsonArgs)
@@ -143,20 +143,31 @@ void addResourceEventJson(const char *jsonArgs)
     if(json.size() == 5)
     {
         int flowTypeInt = (int)(int)(json[0].asDouble());
-        gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, json[1].asString().c_str(), (float)(json[2].asDouble()), json[3].asString().c_str(), json[4].asString().c_str());
+        gameanalytics::GameAnalytics::addResourceEvent((gameanalytics::EGAResourceFlowType)flowTypeInt, json[1].asString().c_str(), (float)(json[2].asDouble()), json[3].asString().c_str(), json[4].asString().c_str()/*, json[5].asString().c_str()*/);
     }
 }
 
-void addProgressionEvent(double progressionStatus, const char *progression01, const char *progression02, const char *progression03)
+void addProgressionEvent(double progressionStatus, const char *progression01, const char *progression02, const char *progression03/*, const char *fields*/)
 {
     int progressionStatusInt = (int)progressionStatus;
-    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03);
+    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03/*, fields*/);
 }
 
-void addProgressionEventWithScore(double progressionStatus, const char *progression01, const char *progression02, const char *progression03, double score)
+void addProgressionEventJson(const char *jsonArgs)
+{
+    Json::Value json = gameanalytics::utilities::GAUtilities::jsonFromString(jsonArgs);
+
+    if(json.size() == 4)
+    {
+        int progressionStatusInt = (int)(json[0].asDouble());
+        gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, json[1].asString().c_str(), json[2].asString().c_str(), json[3].asString().c_str()/*, json[4].asString().c_str()*/);
+    }
+}
+
+void addProgressionEventWithScore(double progressionStatus, const char *progression01, const char *progression02, const char *progression03, double score/*, const char *fields*/)
 {
     int progressionStatusInt = (int)progressionStatus;
-    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03, (int)score);
+    gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, progression01, progression02, progression03, (int)score/*, fields*/);
 }
 
 void addProgressionEventWithScoreJson(const char *jsonArgs)
@@ -166,24 +177,24 @@ void addProgressionEventWithScoreJson(const char *jsonArgs)
     if(json.size() == 5)
     {
         int progressionStatusInt = (int)(int)(json[0].asDouble());
-        gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, json[1].asString().c_str(), json[2].asString().c_str(), json[3].asString().c_str(), (int)(json[4].asDouble()));
+        gameanalytics::GameAnalytics::addProgressionEvent((gameanalytics::EGAProgressionStatus)progressionStatusInt, json[1].asString().c_str(), json[2].asString().c_str(), json[3].asString().c_str(), (int)(json[4].asDouble())/*, json[5].asString().c_str()*/);
     }
 }
 
-void addDesignEvent(const char *eventId)
+void addDesignEvent(const char *eventId/*, const char *fields*/)
 {
-    gameanalytics::GameAnalytics::addDesignEvent(eventId);
+    gameanalytics::GameAnalytics::addDesignEvent(eventId/*, fields*/);
 }
 
-void addDesignEventWithValue(const char *eventId, double value)
+void addDesignEventWithValue(const char *eventId, double value/*, const char *fields*/)
 {
-    gameanalytics::GameAnalytics::addDesignEvent(eventId, value);
+    gameanalytics::GameAnalytics::addDesignEvent(eventId, value/*, fields*/);
 }
 
-void addErrorEvent(double severity, const char *message)
+void addErrorEvent(double severity, const char *message/*, const char *fields*/)
 {
     int severityInt = (int)severity;
-    gameanalytics::GameAnalytics::addErrorEvent((gameanalytics::EGAErrorSeverity)severityInt, message);
+    gameanalytics::GameAnalytics::addErrorEvent((gameanalytics::EGAErrorSeverity)severityInt, message/*, fields*/);
 }
 
 // set calls can be changed at any time (pre- and post-initialize)
@@ -229,6 +240,21 @@ void setGender(double gender)
     int genderInt = (int)gender;
     gameanalytics::GameAnalytics::setGender((gameanalytics::EGAGender)genderInt);
 }
+
+// const char* getCommandCenterValueAsString(const char *key)
+// {
+//     return gameanalytics::GameAnalytics::getCommandCenterValueAsString(key).c_str();
+// }
+//
+// const char* getCommandCenterValueAsStringWithDefaultValue(const char *key, const char *defaultValue)
+// {
+//     return gameanalytics::GameAnalytics::getCommandCenterValueAsString(key, defaultValue).c_str();
+// }
+//
+// bool isCommandCenterReady()
+// {
+//     return gameanalytics::GameAnalytics::isCommandCenterReady();
+// }
 
 void setBirthYear(double birthYear)
 {

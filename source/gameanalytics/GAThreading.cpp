@@ -20,6 +20,9 @@ namespace gameanalytics
         double GAThreading::threadWaitInSeconds = 1.0;
         std::mutex GAThreading::instanceMutex;
 
+        std::atomic<bool> GAThreading::_endThread(false);
+        std::unique_ptr<GAThreading::State> GAThreading::state(new GAThreading::State(GAThreading::thread_routine));
+
         double GAThreading::GetThreadWaitSeconds()
         {
             std::lock_guard<std::mutex> lock(instanceMutex);
@@ -32,21 +35,15 @@ namespace gameanalytics
             threadWaitInSeconds = NewInterval;
         }
 
-        void GAThreading::initIfNeeded()
-        {
-            if (!state)
-            {
-                state = std::make_shared<State>(GAThreading::thread_routine);
-            }
-        }
-
         void GAThreading::scheduleTimer(double interval, const Block& callback)
         {
-            initIfNeeded();
-            GAThreadHelpers::scoped_lock lock(state->mutex);
+            if(_endThread)
+            {
+                return;
+            }
+            std::lock_guard<std::mutex> lock(state->mutex);
 
-            GAThreading::BlockIdentifier blockIdentifier = GAThreading::BlockIdentifier::make();
-            state->blocks.push_back({ callback, blockIdentifier, std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(1000 * interval)) } );
+            state->blocks.push_back({ callback, std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(1000 * interval)) } );
             std::push_heap(state->blocks.begin(), state->blocks.end());
         }
 
@@ -68,9 +65,12 @@ namespace gameanalytics
 
         void GAThreading::performTaskOnGAThread(const Block& taskBlock)
         {
-            initIfNeeded();
-            GAThreadHelpers::scoped_lock lock(state->mutex);
-            state->blocks.push_back({ taskBlock, GAThreading::BlockIdentifier::make(), std::chrono::steady_clock::now()} );
+            if(_endThread)
+            {
+                return;
+            }
+            std::lock_guard<std::mutex> lock(state->mutex);
+            state->blocks.push_back({ taskBlock, std::chrono::steady_clock::now()} );
             std::push_heap(state->blocks.begin(), state->blocks.end());
         }
 
@@ -79,11 +79,12 @@ namespace gameanalytics
             logging::GALogger::ii("ending thread");
             GAThreadHelpers::scoped_lock lock(state->mutex);
             state->endThread = true;
+            _endThread = true;
         }
 
         bool GAThreading::getNextBlock(TimedBlock& timedBlock)
         {
-            GAThreadHelpers::scoped_lock lock(state->mutex);
+            std::lock_guard<std::mutex> lock(state->mutex);
 
             if((!state->blocks.empty() && state->blocks.front().deadline <= std::chrono::steady_clock::now()))
             {
@@ -98,16 +99,11 @@ namespace gameanalytics
 
         void* GAThreading::thread_routine(void*)
         {
-            logging::GALogger::ii("thread_routine start");
-            while(!state)
-            {
-                // wait for the assignment to be complete
-                std::this_thread::sleep_for(std::chrono::seconds(1));
-            }
+            logging::GALogger::d("thread_routine start");
 
             try
             {
-                while (std::shared_ptr<State> state = GAThreading::state)
+                while (!_endThread && state)
                 {
                     TimedBlock timedBlock;
 
@@ -115,17 +111,9 @@ namespace gameanalytics
                     {
                         assert(timedBlock.block);
                         assert(timedBlock.deadline <= std::chrono::steady_clock::now());
-                        if (!timedBlock.ignore)
-                        {
-                            timedBlock.block();
-                        }
+                        timedBlock.block();
                         // clear the block, so that the assert works
                         timedBlock.block = {};
-                    }
-
-                    if(state->endThread)
-                    {
-                        break;
                     }
 
                     std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(threadWaitInSeconds * 1000)));
