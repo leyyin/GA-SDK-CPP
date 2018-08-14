@@ -13,10 +13,17 @@ import shutil
 import fileinput
 
 if platform.system() == 'Windows':
-    from _winreg import ConnectRegistry
-    from _winreg import HKEY_LOCAL_MACHINE
-    from _winreg import OpenKey
-    from _winreg import QueryValueEx
+    if sys.version_info[0] < 3:
+        from _winreg import ConnectRegistry
+        from _winreg import HKEY_LOCAL_MACHINE
+        from _winreg import OpenKey
+        from _winreg import QueryValueEx
+    else:
+        # Python 3
+        from winreg import ConnectRegistry
+        from winreg import HKEY_LOCAL_MACHINE
+        from winreg import OpenKey
+        from winreg import QueryValueEx
 
 if os.name == "nt":
     __CSL = None
