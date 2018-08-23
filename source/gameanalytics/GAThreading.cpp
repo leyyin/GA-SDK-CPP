@@ -33,12 +33,13 @@ namespace gameanalytics
 
         void GAThreading::scheduleTimer(double interval, const Block& callback)
         {
-            if(_endThread)
+            if (_endThread)
             {
                 return;
             }
 
             std::lock_guard<std::mutex> lock(state->mutex);
+            state->blocks.push_back({ callback, std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(1000 * interval)) } );
             std::push_heap(state->blocks.begin(), state->blocks.end());
         }
 
@@ -60,7 +61,7 @@ namespace gameanalytics
 
         void GAThreading::performTaskOnGAThread(const Block& taskBlock)
         {
-            if(_endThread)
+            if (_endThread)
             {
                 return;
             }
@@ -80,7 +81,7 @@ namespace gameanalytics
         {
             std::lock_guard<std::mutex> lock(state->mutex);
 
-            if((!state->blocks.empty() && state->blocks.front().deadline <= std::chrono::steady_clock::now()))
+            if ((!state->blocks.empty() && state->blocks.front().deadline <= std::chrono::steady_clock::now()))
             {
                 timedBlock = state->blocks.front();
                 std::pop_heap(state->blocks.begin(), state->blocks.end());
@@ -113,7 +114,8 @@ namespace gameanalytics
                     std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(threadWaitInSeconds * 1000)));
                 }
 
-                logging::GALogger::d("thread_routine stopped");
+                // This hangs on exit :|
+                //logging::GALogger::d("thread_routine stopped");
             }
             catch(const std::exception& e)
             {

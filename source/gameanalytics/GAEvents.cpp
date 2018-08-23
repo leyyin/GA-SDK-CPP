@@ -527,7 +527,7 @@ namespace gameanalytics
 
                 auto length = event_ts - start_ts;
 
-                logging::GALogger::ii("fixMissingSessionEndEvents length calculated: " + std::to_string(static_cast<int>(length)));
+                logging::GALogger::d("fixMissingSessionEndEvents length calculated: " + std::to_string(static_cast<int>(length)));
 
                 sessionEndEvent["category"] = GAEvents::CategorySessionEnd;
                 sessionEndEvent["length"] = length;

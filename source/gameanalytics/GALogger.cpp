@@ -79,7 +79,7 @@ namespace gameanalytics
                 sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_mt>(p, 1048576 * 5, 3));
                 ga->logger = std::make_shared<spdlog::logger>("gameanalytics", begin(sinks), end(sinks));
 
-                try 
+                try
                 {
                     if (ga->debugEnabled)
                     {
@@ -108,7 +108,7 @@ namespace gameanalytics
         {
             GALogger *ga = GALogger::sharedInstance();
 
-            try 
+            try
             {
                 spdlog::drop("gameanalytics");
                 std::string p(device::GADevice::getWritablePath() + utilities::GAUtilities::getPathSeparator() + "ga_log.txt");
@@ -141,7 +141,7 @@ namespace gameanalytics
 
         void GALogger::addCustomLogStream(std::ostream& os)
         {
-            try 
+            try
             {
                 spdlog::drop("gameanalytics_stream");
                 GALogger *ga = GALogger::sharedInstance();
@@ -263,7 +263,7 @@ namespace gameanalytics
             }
 #endif
 
-            try 
+            try
             {
             switch(type)
             {
