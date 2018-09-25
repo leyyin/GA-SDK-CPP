@@ -280,10 +280,16 @@ namespace gameanalytics
 #elif USE_TIZEN
                     dlog_print(DLOG_ERROR, GALogger::tag.c_str(), message.c_str());
 #else
-                    logger->error(message.c_str());
-                    if(custom_logger)
+                    try
                     {
-                        custom_logger->error(message.c_str());
+                        logger->error(message.c_str());
+                        if(custom_logger)
+                        {
+                            custom_logger->error(message.c_str());
+                        }
+                    }
+                    catch (const std::exception&)
+                    {
                     }
 #endif
                     break;
@@ -301,10 +307,16 @@ namespace gameanalytics
 #elif USE_TIZEN
                     dlog_print(DLOG_WARN, GALogger::tag.c_str(), message.c_str());
 #else
-                    logger->warn(message.c_str());
-                    if(custom_logger)
+                    try
                     {
-                        custom_logger->warn(message.c_str());
+                        logger->warn(message.c_str());
+                        if(custom_logger)
+                        {
+                            custom_logger->warn(message.c_str());
+                        }
+                    }
+                    catch (const std::exception&)
+                    {
                     }
 #endif
                     break;
@@ -322,10 +334,16 @@ namespace gameanalytics
 #elif USE_TIZEN
                     dlog_print(DLOG_DEBUG, GALogger::tag.c_str(), message.c_str());
 #else
-                    logger->info(message.c_str());
-                    if(custom_logger)
+                    try
                     {
-                        custom_logger->info(message.c_str());
+                        logger->info(message.c_str());
+                        if(custom_logger)
+                        {
+                            custom_logger->info(message.c_str());
+                        }
+                    }
+                    catch (const std::exception&)
+                    {
                     }
 #endif
                     break;
@@ -343,10 +361,16 @@ namespace gameanalytics
 #elif USE_TIZEN
                     dlog_print(DLOG_INFO, GALogger::tag.c_str(), message.c_str());
 #else
-                    logger->info(message.c_str());
-                    if(custom_logger)
+                    try
                     {
-                        custom_logger->info(message.c_str());
+                        logger->info(message.c_str());
+                        if(custom_logger)
+                        {
+                            custom_logger->info(message.c_str());
+                        }
+                    }
+                    catch (const std::exception&)
+                    {
                     }
 #endif
                     break;

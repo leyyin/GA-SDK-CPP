@@ -19,7 +19,7 @@ namespace gameanalytics
         std::atomic<double> GAThreading::threadWaitInSeconds{1.0};
 
         std::atomic<bool> GAThreading::_endThread(false);
-        std::unique_ptr<GAThreading::State> GAThreading::state(new GAThreading::State(GAThreading::thread_routine));
+        std::unique_ptr<GAThreading::State> GAThreading::state(new GAThreading::State(GAThreading::thread_routine, GAThreading::_endThread));
 
         double GAThreading::GetThreadWaitSeconds()
         {
@@ -73,7 +73,7 @@ namespace gameanalytics
 
         void GAThreading::endThread()
         {
-            logging::GALogger::ii("ending thread");
+            logging::GALogger::d("endThread now");
             _endThread = true;
         }
 
@@ -92,13 +92,13 @@ namespace gameanalytics
             return false;
         }
 
-        void* GAThreading::thread_routine(void*)
+        void GAThreading::thread_routine(std::atomic<bool>& endThread)
         {
             logging::GALogger::d("thread_routine start");
 
             try
             {
-                while (!_endThread && state)
+                while (!endThread && state)
                 {
                     TimedBlock timedBlock;
 
@@ -114,16 +114,21 @@ namespace gameanalytics
                     std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(threadWaitInSeconds * 1000)));
                 }
 
-                // This hangs on exit :|
-                //logging::GALogger::d("thread_routine stopped");
+                if(!endThread)
+                {
+                    // This hangs on exit :|
+                    //logging::GALogger::d("thread_routine stopped");
+                    logging::GALogger::d("thread_routine stopped");
+                }
             }
             catch(const std::exception& e)
             {
-                logging::GALogger::e("Error on GA thread");
-                logging::GALogger::e(e.what());
+                if(!endThread)
+                {
+                    logging::GALogger::e("Error on GA thread");
+                    logging::GALogger::e(e.what());
+                }
             }
-
-            return nullptr;
         }
     }
 }

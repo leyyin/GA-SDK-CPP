@@ -28,6 +28,15 @@ Dependencies
 
 Changelog
 ---------
+**2.0.3**
+* fixed shutdown issues
+
+**2.0.2**
+* fixed thread hanging on shutdown
+
+**2.0.1**
+* added command center functions to extern interface
+
 **2.0.0**
 * added command center functionality
 
