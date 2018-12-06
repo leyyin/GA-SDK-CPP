@@ -1,5 +1,26 @@
 [![Travis](https://img.shields.io/travis/GameAnalytics/GA-SDK-CPP/master.svg)](https://github.com/GameAnalytics/GA-SDK-CPP)
 
+# WarriOrb Build
+
+NOTE: use the modified CPP SDK, otherwise the build/link will fail.
+
+Windows:
+```sh
+./build.sh -n -t win64-vc140-static
+./build.sh -n -t win32-vc140-static
+
+OR
+
+./build_win_py2.sh -n -t win64-vc140-static
+./build_win_py2.sh -n -t win32-vc140-static
+```
+
+Linux:
+```sh
+./build.sh -n -t linux-x64-clang-static
+```
+
+
 GA-SDK-CPP
 ==========
 
@@ -28,6 +49,9 @@ Dependencies
 
 Changelog
 ---------
+**2.0.4**
+* fixed business event validation
+
 **2.0.3**
 * fixed shutdown issues
 
